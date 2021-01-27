@@ -140,14 +140,24 @@ public class CartController {
 
     @PostMapping("create")
     public ResponseEntity<Void> createCart(@RequestBody CartDTO cart) {
-//        Cart cart = cartService.findById(idCart);
-        Cart cart1 = new Cart();
-        cart1.setUser(userService.findById(cart.getIdUser()));
-        cart1.setGoods(goodsService.findById(cart.getIdGood()));
-        cart1.setQuantity("1");
-        cart1.setStatus(false);
-        cartService.save(cart1);
-        return new ResponseEntity<>(HttpStatus.OK);
+        if (cart.getIdUser() != null){
+            //        Cart cart = cartService.findById(idCart);
+            Cart cart1 = new Cart();
+            cart1.setUser(userService.findById(cart.getIdUser()));
+            cart1.setGoods(goodsService.findById(cart.getIdGood()));
+            cart1.setQuantity("1");
+            cart1.setStatus(false);
+            cartService.save(cart1);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            Cart cart1 = new Cart();
+            cart1.setUser(null);
+            cart1.setGoods(goodsService.findById(cart.getIdGood()));
+            cart1.setQuantity("1");
+            cart1.setStatus(false);
+            cartService.save(cart1);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
     }
 
     @GetMapping("anonymous/{products}")
@@ -177,7 +187,7 @@ public class CartController {
         MimeMessageHelper helper = new MimeMessageHelper(msg, true, "utf-8");
 //        SimpleMailMessage message = new SimpleMailMessage();
         helper.setTo(user.getEmail());
-        helper.setSubject("ESTORE đã nhận đơn hàng");
+        helper.setSubject("NSTORE đã nhận đơn hàng");
 //        StringBuilder stringBuilder = new StringBuilder("<!DOCTYPE html>\n" +
 //                "<html lang=\"en\">\n" +
 //                "<head>\n" +
@@ -551,7 +561,7 @@ public class CartController {
                 "        </div>\n" +
                 "        \n" +
                 "        <div class=\"company-info\">\n" +
-                "          <div>ESTORE.</div>\n" +
+                "          <div>NSTORE.</div>\n" +
                 "\n" +
                 "          <br />\n" +
                 "          \n" +
@@ -567,7 +577,7 @@ public class CartController {
                 "\n" +
                 "      <section id=\"invoice-title-number\">\n" +
                 "      \n" +
-                "        <span id=\"title\">INVOICE</span>\n" +
+                "        <span id=\"title\">Hóa đơn</span>\n" +
                 "        <span id=\"number\">#0028354</span>\n" +
                 "        \n" +
                 "      </section>\n" +
@@ -575,7 +585,7 @@ public class CartController {
                 "      <div class=\"clearfix\"></div>\n" +
                 "      \n" +
                 "      <section id=\"client-info\">\n" +
-                "        <span>To</span>\n" +
+                "        <span>Đến</span>\n" +
                 "        <div>\n");
         stringBuilder.append("<span class=\"bold\">");
         stringBuilder.append(user.getFullName());
@@ -610,10 +620,10 @@ public class CartController {
                         "        \n" +
                         "          <tr>\n" +
                         "            <th>STT</th> <!-- Dummy cell for the row number and row commands -->\n" +
-                        "            <th>Good Name</th>\n" +
-                        "            <th>Price</th>\n" +
-                        "            <th>Quantity</th>\n" +
-                        "            <th>Total Money</th>\n" +
+                        "            <th>Tên sản phẩm</th>\n" +
+                        "            <th>Giá</th>\n" +
+                        "            <th>Số lượng</th>\n" +
+                        "            <th>Tông tiền</th>\n" +
                         "          </tr>\n" +
                         "          \n");
         Double total = 0d;
@@ -651,7 +661,8 @@ public class CartController {
                         "      \n" +
                         "        <table cellpadding=\"0\" cellspacing=\"0\">\n" +
                         "          <tr>\n" +
-                        "            <th>Subtotal</th>\n" +
+                        "            <th>\n" +
+                        "Tổng phụ</th>\n" +
                         "            <td>");
         stringBuilder.append(String.valueOf(total));
         stringBuilder.append("VNĐ");
@@ -659,30 +670,30 @@ public class CartController {
                 "          </tr>\n" +
                 "          \n" +
                 "          <tr data-iterate=\"tax\">\n" +
-                "            <th>Shipping</th>\n" +
-                "            <td>2 VNĐ</td>\n" +
+                "            <th>Phí giao</th>\n" +
+                "            <td>5000 VNĐ</td>\n" +
                 "          </tr>\n" +
                 "          \n" +
                 "          <!-- You can use attribute data-hide-on-quote=\"true\" to hide specific information on quotes.\n" +
                 "               For example Invoicebus doesn't need amount paid and amount due on quotes  -->\n" +
                 "          <tr data-hide-on-quote=\"true\">\n" +
-                "            <th>Total</th>\n" +
+                "            <th>Tổng</th>\n" +
                 "            <td>");
-        stringBuilder.append(String.valueOf(total + 2));
+        stringBuilder.append(String.valueOf(total + 5000));
         stringBuilder.append("VNĐ");
         stringBuilder.append(
                 "</td>\n" +
                         "          </tr>\n" +
                         "          \n" +
                         "          <tr data-hide-on-quote=\"true\">\n" +
-                        "            <th>Paid</th>\n" +
+                        "            <th>Đã thanh toán</th>\n" +
                         "            <td>0 VNĐ</td>\n" +
                         "          </tr>\n" +
                         "          \n" +
                         "          </tr>\n" +
                         "          \n" +
                         "          <tr data-hide-on-quote=\"true\">\n" +
-                        "            <th>AMOUNT DUE</th>\n" +
+                        "            <th>Số tiền phải trả</th>\n" +
                         "            <td>");
         stringBuilder.append(total + 2);
         stringBuilder.append("VNĐ");
@@ -700,18 +711,19 @@ public class CartController {
                         "\n" +
                         "      <section id=\"invoice-info\">\n" +
                         "        <div>\n" +
-                        "          <span>Issue Date</span> <span>");
+                        "          <span>\n" +
+                        "Ngày phát hành</span> <span>");
         stringBuilder.append(String.valueOf(LocalDate.now()));
         stringBuilder.append("</span>\n" +
                 "        </div>\n" +
                 "        <div>\n" +
-                "          <span>Due Date</span> <span>2020/01/30</span>\n" +
+                "          <span>Ngày kết thúc</span> <span>2020/01/30</span>\n" +
                 "        </div>\n" +
                 "\n" +
                 "        <br />\n" +
                 "\n" +
                 "        <div>\n" +
-                "          <span>Currency:</span> <span>USD</span>\n" +
+                "          <span>Currency:</span> <span>VNĐ</span>\n" +
                 "        </div>\n" +
                 "        <div>\n" +
                 "          <span>P.O</span> <span>#1/2/4</span>\n" +
@@ -723,16 +735,16 @@ public class CartController {
                 "      \n" +
                 "      <section id=\"terms\">\n" +
                 "\n" +
-                "        <div class=\"notes\">Fred, thank you very much. We really appreciate your business.\n" +
-                "                    Please send payments before the due date</div>\n" +
+                "        <div class=\"notes\">NSTORE, cảm ơn bạn rất nhiều. Chúng tôi thực sự đánh giá cao của bạn. \\ N \"+\n" +
+                "                \"Vui lòng gửi thanh toán trước ngày đến hạn</div>\n" +
                 "\n" +
                 "        <br />\n" +
                 "\n" +
                 "        <div class=\"payment-info\">\n" +
-                "          <div> Payment details:</div>\n" +
+                "          <div> Chi tiết thanh toán:</div>\n" +
                 "          <div> ● ACC 123006705</div>\n" +
                 "          <div>   ● IBAN US100000060345</div>\n" +
-                "          <div>● SWIFT BOA447</div>\n" +
+                "          <div>● NHANH BOA447</div>\n" +
                 "        </div>\n" +
                 "        \n" +
                 "      </section>\n" +
